@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/TryImpossible/javascript-jsbridge-sdk/issues"
   },
-  "homepage": "https://github.com/TryImpossible/javascript-jsbridge-sdk/blob/master/tabView/README.md"
+  "homepage": "https://github.com/TryImpossible/javascript-jsbridge-sdk/blob/master/tabView/README.md",
+  "devDependencies": {
+    "typescript": "^4.9.4"
+  }
 }
