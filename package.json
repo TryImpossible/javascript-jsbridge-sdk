@@ -1,0 +1,29 @@
+{
+  "name": "javascript-jsbridge-sdk",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "jsbridge",
+    "jsbridge-sdk",
+    "javascript-jsbridge",
+    "javascript-jsbridge-sdk"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:TryImpossible/javascript-jsbridge-sdk.git"
+  },
+  "author": {
+    "name": "try",
+    "email": "865068275@qq.com",
+    "url": "https://github.com/TryImpossible"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TryImpossible/javascript-jsbridge-sdk/issues"
+  },
+  "homepage": "https://github.com/TryImpossible/javascript-jsbridge-sdk/blob/master/tabView/README.md"
+}

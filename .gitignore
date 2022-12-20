@@ -1,0 +1,28 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+# Android/IntelliJ
+#
+.idea/
+
+# node.js
+#
+node_modules/
+node_modules/
+
+# jsbridge-plus-sdk
+dist/
+
