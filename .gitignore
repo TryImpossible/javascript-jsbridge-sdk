@@ -21,8 +21,4 @@
 # node.js
 #
 node_modules/
-node_modules/
-
-# jsbridge-plus-sdk
-dist/
 
