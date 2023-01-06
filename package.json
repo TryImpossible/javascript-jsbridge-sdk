@@ -2,8 +2,14 @@
   "name": "javascript-jsbridge-sdk",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/jsbridge.cjs.js",
+  "jsnext:main": "dist/jsbridge.es.js",
+  "module": "dist/jsbridge.es.js",
+  "browser": "dist/jsbridge.umd.js",
+  "type": "module",
   "scripts": {
+    "dev": "npx rollup -wc rollup.config.dev.js",
+    "build": "rm -rf dist && npx rollup -c rollup.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -21,9 +27,24 @@
     "email": "865068275@qq.com",
     "url": "https://github.com/TryImpossible"
   },
-  "license": "ISC",
+  "license": "BSD",
   "bugs": {
     "url": "https://github.com/TryImpossible/javascript-jsbridge-sdk/issues"
   },
-  "homepage": "https://github.com/TryImpossible/javascript-jsbridge-sdk/blob/master/tabView/README.md"
+  "homepage": "https://github.com/TryImpossible/javascript-jsbridge-sdk/blob/master/tabView/README.md",
+  "devDependencies": {
+    "@babel/core": "^7.20.12",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.0.0",
+    "@rollup/plugin-eslint": "^9.0.1",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.2.1",
+    "@rollup/plugin-typescript": "^10.0.1",
+    "rollup": "^3.9.1",
+    "rollup-plugin-bundle-size": "^1.0.3",
+    "rollup-plugin-filesize": "^9.1.2",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^2.0.2"
+  }
 }
