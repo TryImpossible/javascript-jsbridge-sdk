@@ -1,6 +1,6 @@
 {
   "name": "javascript-jsbridge-sdk",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A lightweight jsbridge for sending messages between javascript and native code(iOS/Android/ReactNative/Flutter) in WebViews.",
   "main": "dist/jsbridge.cjs.js",
   "jsnext:main": "dist/jsbridge.es.js",
