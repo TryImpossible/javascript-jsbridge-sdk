@@ -124,21 +124,27 @@
           message.data = payload.data;
         }
   
-        if (!_callbacks[message.id]) {
-          _callbacks[message.id] = {};
-        }
         if (payload.success) {
+          if (!_callbacks[message.id]) {
+            _callbacks[message.id] = {};
+          }
           _callbacks[message.id].success = payload.success;
         }
         if (payload.fail) {
+          if (!_callbacks[message.id]) {
+            _callbacks[message.id] = {};
+          }
           _callbacks[message.id].fail = payload.fail;
         }
       }
   
       _postMessage(message);
   
-      if (/native code/.test(Promise.toString()) && typeof Promise !== 'undefined') {
-        return new Promise((resolve, reject) => _promises[message.id] = { resolve, reject }).catch(function(_){});
+      if (!_callbacks[message.id]) {
+        // 没有callback时，尝试使用Promise
+        if (/native code/.test(Promise.toString()) && typeof Promise !== 'undefined') {
+          return new Promise((resolve, reject) => _promises[message.id] = { resolve, reject });
+        }
       }
     }
   
