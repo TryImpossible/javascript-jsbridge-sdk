@@ -1,223 +1,256 @@
-(function () {
-  if (window.javascriptJSBridgeChannel) {
-    return;
-  }
-
-  var jsBridge = {
+(function(){
+  function JSBridge() {
     // 方法集合
-    handlers: {},
+    var _handlers = {};
     // 回调集合
-    callbacks: {},
-    promises: {},
-    id: 0,
-    debug: false,
+    var _callbacks = {};
+    var _promises = {};
+    // 方法标识ID
+    var _id = 0;
+    // debug模式
+    var _debug = false;
+    // 支持的渠道
+    var _channel = ['flutter'];
 
-    registerHandler: _registerHandler,
-    unregisterHandler: _unregisterHandler,
-    callHandler: _callHandler,
-    onMessageReceived: function (messageString) {
-      setTimeout(function () {
-        _onMessageReceived(messageString);
-      }, 0);
-    },
-  };
-
-  function _log() {
-    if (jsBridge.debug) {
-      var args = Array.prototype.slice.call(arguments)
-      console.log.apply(null, args);
-    }
-  }
-
-  // 注册方法
-  function _registerHandler(handlerName, handler) {
-    jsBridge.handlers[handlerName] = handler;
-  }
-
-  // 注销方法
-  function _unregisterHandler(handlerName) {
-    if (!jsBridge.handlers[handlerName]) {
-      return;
-    }
-    delete jsBridge.handlers[handlerName];
-  }
-
-  // 调用方法
-  // const {data, success, fail} = payload
-  function _callHandler(handlerName, payload) {
-    return _receiverCall(handlerName, payload);
-  }
-
-  // 监听jsbridge消息
-  function _onMessageReceived(messageString) {
-    var decodeString = decodeURIComponent(messageString);
-    var jsonData = JSON.parse(decodeString);
-    _log('[javascriptJSBridgeChannel receiveMessage]: ', jsonData);
-    var message = jsonData;
-
-    if (message.type === 'request') {
-      _senderCall(message);
-    }
-    if (message.type === 'response') {
-      _receiverCallResponse(message);
-    }
-  }
-
-  // 发送jsbridge消息
-  function _postMessage(jsonData) {
-    _log('[javascriptJSBridgeChannel postMessage]: ', jsonData);
-    var jsonString = JSON.stringify(jsonData);
-    var encodeString = encodeURIComponent(jsonString);
-    if (self != top) {
-      // iframe load current page
-      window.parent.postMessage(encodeString, '*');
-    } else {
-      window.FlutterJSBridgeChannel && window.FlutterJSBridgeChannel.postMessage(encodeString);
-    }
-  }
-
-  // 接收者调用方法
-  function _receiverCall(handlerName, payload) {
-    if (!handlerName) {
-      throw Error('javascriptJSBridgeChannel: handler name can not be null!!!');
-    }
-
-    var message = {
-      id: jsBridge.id++,
-      type: 'request',
-      resolved: false,
-      rejected: false,
-    };
-    message.action = handlerName;
-    if (payload) {
-      if (payload.data) {
-        message.data = payload.data;
-      }
-
-      if (!jsBridge.callbacks[message.id]) {
-        jsBridge.callbacks[message.id] = {};
-      }
-      if (payload.success) {
-        jsBridge.callbacks[message.id].success = payload.success;
-      }
-      if (payload.fail) {
-        jsBridge.callbacks[message.id].fail = payload.fail;
+    // 打印日志
+    function _log() {
+      if (_debug) {
+        var args = Array.prototype.slice.call(arguments)
+        console.log.apply(null, args);
       }
     }
 
-    _postMessage(message);
-
-    if (/native code/.test(Promise.toString()) && typeof Promise !== 'undefined') {
-      return new Promise((resolve, reject) => jsBridge.promises[message.id] = { resolve, reject }).catch(function(_){});
+    // 是否支持Iframe渠道
+    function _isIframeChannel() {
+      return _channel.indexOf('iframe') > -1
     }
-  }
 
-  // 接收者调用方法的回调
-  function _receiverCallResponse(message) {
-    var id = message.id;
-    var data = message.data;
-    var isResolved = message.resolved;
-    var isRejected = message.rejected;
-
-    if (jsBridge.callbacks[id]) {
-      if (isResolved) {
-        jsBridge.callbacks[id].success && jsBridge.callbacks[id].success(data);
-      }
-      if (isRejected) {
-        jsBridge.callbacks[id].fail && jsBridge.callbacks[id].fail(data);
-      }
-      delete jsBridge.callbacks[id];
+    // 是否支持flutter渠道
+    function _isFlutterChannel() {
+      return _channel.indexOf('flutter') > -1
     }
-    if (jsBridge.promises[id]) {
-      if (isResolved) {
-        jsBridge.promises[id].resolve(data);
-      }
-      if (isRejected) {
-        jsBridge.promises[id].reject(data);
-      }
-      delete jsBridge.promises[id];
-    }
-  }
 
-  // 发送者调用方法
-  function _senderCall(message) {
-    // 成功的回调
-    function _successResponse(data) {
-      message = {
-        action: message.action,
-        data: data,
-        id: message.id,
-        type: 'response',
-        resolved: true,
+    // 是否支持reactnative渠道
+    function _isReactNativeChannel() {
+      return _channel.indexOf('reactnative') > -1
+    }
+
+    // 初始化
+    function _init(config) {
+      if (!config) {
+        return;
+      }
+      if (config.debug) {
+        _debug = !!config.debug;
+      }
+      if (config.channel && Object.prototype.toString.apply(config.channel) === '[object Array]') {
+        _channel = config.channel;
+        if (_isIframeChannel()) {
+          window.addEventListener('message', (event) => {
+            window.eval(event.data);
+          });
+        }
+      }
+    }
+  
+    // 注册方法
+    function _registerHandler(handlerName, handler) {
+      _handlers[handlerName] = handler;
+    }
+  
+    // 注销方法
+    function _unregisterHandler(handlerName) {
+      if (!_handlers[handlerName]) {
+        return;
+      }
+      delete _handlers[handlerName];
+    }
+  
+    // 调用方法
+    // const {data, success, fail} = payload
+    function _callHandler(handlerName, payload) {
+      return _receiverCall(handlerName, payload);
+    }
+  
+    // 监听jsbridge消息
+    function _onMessageReceived(messageString) {
+      var decodeString = decodeURIComponent(messageString);
+      var jsonData = JSON.parse(decodeString);
+      _log('[WebViewJSBridge receiveMessage]: ', jsonData);
+      var message = jsonData;
+  
+      if (message.type === 'request') {
+        _senderCall(message);
+      }
+      if (message.type === 'response') {
+        _receiverCallResponse(message);
+      }
+    }
+  
+    // 发送jsbridge消息
+    function _postMessage(jsonData) {
+      _log('[WebViewJSBridge postMessage]: ', jsonData);
+      var jsonString = JSON.stringify(jsonData);
+      var encodeString = encodeURIComponent(jsonString);
+      if (_isIframeChannel()) {
+        if (self != top) {
+          // iframe load current page
+          window.parent.postMessage(encodeString, '*');
+        }
+      }
+      if (_isFlutterChannel()) {
+        window.FlutterWebView && window.FlutterWebView.postMessage(encodeString);
+      }
+      if (_isReactNativeChannel()){
+        window.ReactNativeWebView && window.ReactNativeWebView.postMessage(encodeString);
+      }
+    }
+  
+    // 接收者调用方法
+    function _receiverCall(handlerName, payload) {
+      if (!handlerName) {
+        throw Error('WebViewJSBridge: handler name can not be null!!!');
+      }
+  
+      var message = {
+        id: _id++,
+        type: 'request',
+        resolved: false,
         rejected: false,
       };
-      _senderCallResponse(message);
+      message.action = handlerName;
+      if (payload) {
+        if (payload.data) {
+          message.data = payload.data;
+        }
+  
+        if (!_callbacks[message.id]) {
+          _callbacks[message.id] = {};
+        }
+        if (payload.success) {
+          _callbacks[message.id].success = payload.success;
+        }
+        if (payload.fail) {
+          _callbacks[message.id].fail = payload.fail;
+        }
+      }
+  
+      _postMessage(message);
+  
+      if (/native code/.test(Promise.toString()) && typeof Promise !== 'undefined') {
+        return new Promise((resolve, reject) => _promises[message.id] = { resolve, reject }).catch(function(_){});
+      }
     }
-
-    // 失败的回调
-    function _failResponse(err) {
-      message = {
-        action: message.action,
-        data: err,
-        id: message.id,
-        type: 'response',
-        resolved: false,
-        rejected: true,
-      };
-      _senderCallResponse(message);
+  
+    // 接收者调用方法的回调
+    function _receiverCallResponse(message) {
+      var id = message.id;
+      var data = message.data;
+      var isResolved = message.resolved;
+      var isRejected = message.rejected;
+  
+      if (_callbacks[id]) {
+        if (isResolved) {
+          _callbacks[id].success && _callbacks[id].success(data);
+        }
+        if (isRejected) {
+          _callbacks[id].fail && _callbacks[id].fail(data);
+        }
+        delete _callbacks[id];
+      }
+      if (_promises[id]) {
+        if (isResolved) {
+          _promises[id].resolve(data);
+        }
+        if (isRejected) {
+          _promises[id].reject(data);
+        }
+        delete _promises[id];
+      }
     }
-
-    var handlerName = message.action;
-    if (handlerName in jsBridge.handlers) {
-      var handler = jsBridge.handlers[handlerName];
-      var promise = handler(message.data, function (data) {
-        _successResponse(data);
-      }, function (err) {
-        _failResponse(err);
-      });
-      if (Object.prototype.toString.call(promise) == '[object Promise]') {
-        promise.then(function (data) {
+  
+    // 发送者调用方法
+    function _senderCall(message) {
+      // 成功的回调
+      function _successResponse(data) {
+        message = {
+          action: message.action,
+          data: data,
+          id: message.id,
+          type: 'response',
+          resolved: true,
+          rejected: false,
+        };
+        _senderCallResponse(message);
+      }
+  
+      // 失败的回调
+      function _failResponse(err) {
+        message = {
+          action: message.action,
+          data: err,
+          id: message.id,
+          type: 'response',
+          resolved: false,
+          rejected: true,
+        };
+        _senderCallResponse(message);
+      }
+  
+      var handlerName = message.action;
+      if (handlerName in _handlers) {
+        var handler = _handlers[handlerName];
+        var promise = handler(message.data, function (data) {
           _successResponse(data);
         }, function (err) {
-          _failResponse(err.toString);
+          _failResponse(err);
         });
+        if (Object.prototype.toString.call(promise) == '[object Promise]') {
+          promise.then(function (data) {
+            _successResponse(data);
+          }).catch(function (err) {
+            _failResponse(err.toString());
+          });
+        }
+      } else {
+        _failResponse(`handler name -> ${handlerName} can't find!!!`);
       }
-    } else {
-      _failResponse(`handler name -> ${handlerName} can't find!!!`);
     }
+  
+    // 发送者调用方法的回调
+    function _senderCallResponse(message) {
+      _postMessage(message);
+    }
+
+    return {
+      init: _init,
+      registerHandler: _registerHandler,
+      unregisterHandler: _unregisterHandler,
+      callHandler: _callHandler,
+      onMessageReceived: function (messageString) {
+        setTimeout(function () {
+          _onMessageReceived(messageString);
+        }, 0);
+      },
+    };
   }
 
-  // 发送者调用方法的回调
-  function _senderCallResponse(message) {
-    _postMessage(message);
+  if (window.WebViewJSBridge) {
+    return;
   }
-
-  window.javascriptJSBridgeChannel = {
-    set debug(isDebug) {
-      jsBridge.debug = isDebug;
-    },
-    registerHandler: jsBridge.registerHandler,
-    unregisterHandler: jsBridge.unregisterHandler,
-    callHandler: jsBridge.callHandler,
-    onMessageReceived: jsBridge.onMessageReceived,
-  };
+  window.WebViewJSBridge = new JSBridge();
 
   setTimeout(() => {
     var doc = document;
-    var readyEvent = doc.createEvent('Events');
+    var readyEvent = doc.createEvent('Event');
     var jobs = window.WVJBCallbacks || [];
-    readyEvent.initEvent('javascriptJSBridgeChannelReady');
-    readyEvent.bridge = javascriptJSBridgeChannel;
+    readyEvent.initEvent('WebViewJSBridgeReady', true, false);
+    readyEvent.bridge = WebViewJSBridge;
     delete window.WVJBCallbacks;
     for (var i = 0; i < jobs.length; i++) {
       var job = jobs[i];
-      job(javascriptJSBridgeChannel);
+      job(WebViewJSBridge);
     }
     doc.dispatchEvent(readyEvent);
   }, 0);
-
-  window.addEventListener('message', (event) => {
-    window.eval(event.data);
-    // window.javascriptJSBridgeChannel.onMessageReceived(event.data);
-  });
 })();
