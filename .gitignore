@@ -14,11 +14,10 @@
 *.ipr
 *.iws
 .idea/
+
 # Android/IntelliJ
-#
 .idea/
 
 # node.js
-#
 node_modules/
 
