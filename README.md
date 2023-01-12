@@ -152,8 +152,3 @@ function setupWebViewJSBridge (callback) {
 | payload     | 参数对象<br/>data:发送过来的数据                                                | (Object)  | 是   |
 | return      | 返回Promise<br/>resolve:native端业务处理成功时的回调<br/>reject:native端业务处理失败时的回调 | (Promise) | 是   |
 
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to contribute to the
-package, how to file issues, what response they can expect from the package authors, and more.
