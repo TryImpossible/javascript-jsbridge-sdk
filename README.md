@@ -15,10 +15,11 @@
 - 在`html`文件中引用`script`标签
 
 ```html
-
 <script src="https://unpkg.com/javascript-jsbridge-sdk@latest/dist/jsbridge.umd.js"></script>
 ```
-- 在使用window.WebViewJSBridge之前，调用setupWebViewJSBridge方法确保window.WebViewJSBridge存在
+
+- 在使用 window.WebViewJSBridge 之前，调用 setupWebViewJSBridge 方法确保 window.WebViewJSBridge 存在
+
 ```text
 var isAndroid = navigator.userAgent.indexOf('Android') > -1 || navigator.userAgent.indexOf('Adr') > -1;
 var isiOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/);
@@ -63,17 +64,17 @@ function setupWebViewJSBridge (callback) {
 ### 初始化配置
 
 ```text
-  window.WebViewJSBridge.init({debug: true, channel: 'flutter'});
+  window.WebViewJSBridge.init({debug: true, channel: ['flutter']});
 ```
 
-| 参数      | 说明                                   | 默认值和类型          | 必传  |
-|---------|--------------------------------------|-----------------|-----|
-| debug   | 调试模式                                 | false(Boolean)  | 否   |
-| channel | 渠道，支持android、ios、reactnative、flutter | flutter(String) | 否   |
+| 参数    | 说明                                          | 默认值和类型        | 必传 |
+| ------- | --------------------------------------------- | ------------------- | ---- |
+| debug   | 调试模式                                      | false(Boolean)      | 否   |
+| channel | 渠道，支持 android、ios、reactnative、flutter | ['flutter'] (Array) | 否   |
 
 ### 注册方法
 
-#### callback模式
+#### callback 模式
 
 ```text
   window.WebViewJSBridge.registerHandler('JSEcho', function (data, success, fail) {
@@ -82,12 +83,12 @@ function setupWebViewJSBridge (callback) {
   });
 ```
 
-| 参数          | 说明                                                                                          | 默认值和类型     | 必传  |
-|-------------|---------------------------------------------------------------------------------------------|------------|-----|
-| handlerName | 注册的方法名称                                                                                     | (String)   | 是   |
-| handler     | 注册的方法实现，没有返回值<br/>data:发送过来的数据<br/>success:js端业务处理成功时通知native端<br/>fail:js端业务处理失败时通知native端 | (Function) | 是   |
+| 参数        | 说明                                                                                                                                        | 默认值和类型 | 必传 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ---- |
+| handlerName | 注册的方法名称                                                                                                                              | (String)     | 是   |
+| handler     | 注册的方法实现，没有返回值<br/>data:发送过来的数据<br/>success:js 端业务处理成功时通知 native 端<br/>fail:js 端业务处理失败时通知 native 端 | (Function)   | 是   |
 
-#### promise模式
+#### promise 模式
 
 ```text
   window.WebViewJSBridge.registerHandler('JSEcho', async function (data) {
@@ -98,10 +99,10 @@ function setupWebViewJSBridge (callback) {
   });
 ```
 
-| 参数          | 说明                                                                                                                | 默认值和类型     | 必传  |
-|-------------|-------------------------------------------------------------------------------------------------------------------|------------|-----|
-| handlerName | 注册的方法名称                                                                                                           | (String)   | 是   |
-| handler     | 注册的方法实现，返回Promise<br/>data:发送过来的数据<br/>Promise.resolve:js端业务处理成功时通知native端<br/>Promise.reject:js端业务处理失败时通知native端 | (Function) | 是   |
+| 参数        | 说明                                                                                                                                                            | 默认值和类型 | 必传 |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ---- |
+| handlerName | 注册的方法名称                                                                                                                                                  | (String)     | 是   |
+| handler     | 注册的方法实现，返回 Promise<br/>data:发送过来的数据<br/>Promise.resolve:js 端业务处理成功时通知 native 端<br/>Promise.reject:js 端业务处理失败时通知 native 端 | (Function)   | 是   |
 
 ### 取消注册方法
 
@@ -109,13 +110,13 @@ function setupWebViewJSBridge (callback) {
   window.WebViewJSBridge.unregisterHandler('JSEcho');
 ```
 
-| 参数          | 说明      | 默认值和类型    | 必传  |
-|-------------|---------|-----------|-----|
-| handlerName | 注册的方法名称 | (Boolean) | 是   |
+| 参数        | 说明           | 默认值和类型 | 必传 |
+| ----------- | -------------- | ------------ | ---- |
+| handlerName | 注册的方法名称 | (Boolean)    | 是   |
 
 ### 调用方法
 
-#### callback模式
+#### callback 模式
 
 ```text
   window.WebViewJSBridge.callHandler('FlutterEcho', {
@@ -129,12 +130,12 @@ function setupWebViewJSBridge (callback) {
   });
 ```
 
-| 参数          | 说明                                                                             | 默认值和类型   | 必传  |
-|-------------|--------------------------------------------------------------------------------|----------|-----|
-| handlerName | 调用的方法名称                                                                        | (String) | 是   |
-| payload     | 参数对象<br/>data:发送过来的数据<br/>success:native端业务处理成功时的回调<br/>fail:native端业务处理失败时的回调 | (Object) | 是   |
+| 参数        | 说明                                                                                                              | 默认值和类型 | 必传 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------- | ------------ | ---- |
+| handlerName | 调用的方法名称                                                                                                    | (String)     | 是   |
+| payload     | 参数对象<br/>data:发送过来的数据<br/>success:native 端业务处理成功时的回调<br/>fail:native 端业务处理失败时的回调 | (Object)     | 否   |
 
-#### promise模式
+#### promise 模式
 
 ```text
   try {
@@ -146,9 +147,9 @@ function setupWebViewJSBridge (callback) {
     print('[call handler] fail response: ' + err);
   }
 ```
-| 参数          | 说明                                                                   | 默认值和类型    | 必传  |
-|-------------|----------------------------------------------------------------------|-----------|-----|
-| handlerName | 调用的方法名称                                                              | (String)  | 是   |
-| payload     | 参数对象<br/>data:发送过来的数据                                                | (Object)  | 是   |
-| return      | 返回Promise<br/>resolve:native端业务处理成功时的回调<br/>reject:native端业务处理失败时的回调 | (Promise) | 是   |
 
+| 参数        | 说明                                                                                            | 默认值和类型 | 必传 |
+| ----------- | ----------------------------------------------------------------------------------------------- | ------------ | ---- |
+| handlerName | 调用的方法名称                                                                                  | (String)     | 是   |
+| payload     | 参数对象<br/>data:发送过来的数据                                                                | (Object)     | 是   |
+| return      | 返回 Promise<br/>resolve:native 端业务处理成功时的回调<br/>reject:native 端业务处理失败时的回调 | (Promise)    | 否   |
