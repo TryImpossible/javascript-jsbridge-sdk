@@ -1,4 +1,4 @@
-(function(){
+(function () {
   function JSBridge() {
     // 方法集合
     var _handlers = {};
@@ -37,27 +37,44 @@
 
     // 初始化
     function _init(config) {
-      if (!config) {
-        return;
-      }
-      if (config.debug) {
-        _debug = !!config.debug;
-      }
-      if (config.channel && Object.prototype.toString.apply(config.channel) === '[object Array]') {
-        _channel = config.channel;
-        if (_isIframeChannel()) {
-          window.addEventListener('message', (event) => {
-            window.eval(event.data);
-          });
+      if (config) {
+        if (config.debug) {
+          _debug = !!config.debug;
+        }
+        if (config.channel && Object.prototype.toString.apply(config.channel) === '[object Array]') {
+          _channel = config.channel;
+          if (_isIframeChannel()) {
+            window.addEventListener('message', (event) => {
+              window.eval(event.data);
+            });
+          }
         }
       }
+
+      _registerHandler('#evalJavaScript#', function (data, success, fail) {
+        try {
+          success(Function('"use strict";return (' + data.toString() + ')')());
+        } catch (error) {
+          _log(error);
+          fail(error.toSring())
+        }
+      });
+      _callHandler('#jsbridgeReady#', {
+        data: true,
+        success: function (data) {
+          _log('[#jsbridgeReady#] success response: ' + data);
+        },
+        fail: function (err) {
+          _log('[#jsbridgeReady#] fail response: ' + err);
+        },
+      });
     }
-  
+
     // 注册方法
     function _registerHandler(handlerName, handler) {
       _handlers[handlerName] = handler;
     }
-  
+
     // 注销方法
     function _unregisterHandler(handlerName) {
       if (!_handlers[handlerName]) {
@@ -65,20 +82,20 @@
       }
       delete _handlers[handlerName];
     }
-  
+
     // 调用方法
     // const {data, success, fail} = payload
     function _callHandler(handlerName, payload) {
       return _receiverCall(handlerName, payload);
     }
-  
+
     // 监听jsbridge消息
     function _onMessageReceived(messageString) {
       var decodeString = decodeURIComponent(messageString);
       var jsonData = JSON.parse(decodeString);
       _log('[WebViewJSBridge receiveMessage]: ', jsonData);
       var message = jsonData;
-  
+
       if (message.type === 'request') {
         _senderCall(message);
       }
@@ -86,7 +103,7 @@
         _receiverCallResponse(message);
       }
     }
-  
+
     // 发送jsbridge消息
     function _postMessage(jsonData) {
       _log('[WebViewJSBridge postMessage]: ', jsonData);
@@ -101,17 +118,17 @@
       if (_isFlutterChannel()) {
         window.FlutterWebView && window.FlutterWebView.postMessage(encodeString);
       }
-      if (_isReactNativeChannel()){
+      if (_isReactNativeChannel()) {
         window.ReactNativeWebView && window.ReactNativeWebView.postMessage(encodeString);
       }
     }
-  
+
     // 接收者调用方法
     function _receiverCall(handlerName, payload) {
       if (!handlerName) {
         throw Error('WebViewJSBridge: handler name can not be null!!!');
       }
-  
+
       var message = {
         id: _id++,
         type: 'request',
@@ -123,7 +140,7 @@
         if (payload.data) {
           message.data = payload.data;
         }
-  
+
         if (payload.success) {
           if (!_callbacks[message.id]) {
             _callbacks[message.id] = {};
@@ -137,9 +154,9 @@
           _callbacks[message.id].fail = payload.fail;
         }
       }
-  
+
       _postMessage(message);
-  
+
       if (!_callbacks[message.id]) {
         // 没有callback时，尝试使用Promise
         if (/native code/.test(Promise.toString()) && typeof Promise !== 'undefined') {
@@ -147,14 +164,14 @@
         }
       }
     }
-  
+
     // 接收者调用方法的回调
     function _receiverCallResponse(message) {
       var id = message.id;
       var data = message.data;
       var isResolved = message.resolved;
       var isRejected = message.rejected;
-  
+
       if (_callbacks[id]) {
         if (isResolved) {
           _callbacks[id].success && _callbacks[id].success(data);
@@ -174,7 +191,7 @@
         delete _promises[id];
       }
     }
-  
+
     // 发送者调用方法
     function _senderCall(message) {
       // 成功的回调
@@ -189,7 +206,7 @@
         };
         _senderCallResponse(message);
       }
-  
+
       // 失败的回调
       function _failResponse(err) {
         message = {
@@ -202,7 +219,7 @@
         };
         _senderCallResponse(message);
       }
-  
+
       var handlerName = message.action;
       if (handlerName in _handlers) {
         var handler = _handlers[handlerName];
@@ -222,7 +239,7 @@
         _failResponse(`handler name -> ${handlerName} can't find!!!`);
       }
     }
-  
+
     // 发送者调用方法的回调
     function _senderCallResponse(message) {
       _postMessage(message);
